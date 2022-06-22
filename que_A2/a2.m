@@ -65,17 +65,29 @@ end
 
 %% 1.c
 hW = hamming(frameWdth);
-storage = {[], [], [], [], []};
+ceps_storage = {[], [], [], [], []};
 
 for signal_th=1:5
-    ceps = zeros(12, len_vowel_frames(signal_th, 1));
+    ceps = zeros(len_vowel_frames(signal_th, 1), 12);
     for v_i = 1:len_vowel_frames(signal_th, 1)
 
-        start = (vowel_frames(v_i)-1)*frameShft + 1;
-        k = data.utterance{1,1}(start:(start-1+frameWdth));
+        start = (vowel_frames(signal_th, v_i)-1)*frameShft + 1;
         [y,ym] = rceps(hW.*data.utterance{1,signal_th}(start:(start-1+frameWdth)));
-        ceps(1:12, v_i) = y(2:13);
+        %fprintf('a: [%s]\n', join(string(y(2:13)), ','));
+        ceps(v_i, 1:12) = (y(2:13));
     end
-    storage{1, signal_th} = ceps;
+    ceps_storage{1, signal_th} = ceps;
 end
 
+
+%% 2.a
+% Concate ceps values from 2 records into 1. TODO: may be should not!
+ceps_M1 = vertcat(ceps_storage{1,1}, ceps_storage{1,2});
+ceps_M3 = vertcat(ceps_storage{1,3}, ceps_storage{1,4});
+ceps_X1 = ceps_storage{1,5};
+
+mu_M1 = mean(ceps_M1);
+mu_M3 = mean(ceps_M3);
+
+sigmaM1 = diag(cov(ceps_M1));
+sigmaM3 = diag(cov(ceps_M3));
